@@ -1,6 +1,7 @@
 #include <Wire.h>
 
 #define I2C_ADDR 0x52
+#define MULTIPLEXER_ADDR 0x70
 #define NUM_OF_COLOR_SENSORS 2
 #define OUTPUT_PIN_START 2 //six pins after and including this will be used to output color sensor state
 
@@ -90,15 +91,12 @@ void loop() {
     blue=255*pow(blue/maxV,5);
 
     if (red > 254 && green < 10 && blue < 10) {
-//      Serial.println("red ball wowie 😳😳");
       digitalWrite(OUTPUT_PIN_START+(i*3), HIGH);
       digitalWrite(OUTPUT_PIN_START+(i*3)+1, LOW);
     } else if (blue > 254 && red < 10 && green < 10) {
-//      Serial.println("blue ball woahhh 💙💙");
       digitalWrite(OUTPUT_PIN_START+(i*3), LOW);
       digitalWrite(OUTPUT_PIN_START+(i*3)+1, HIGH);
     } else {
-//      Serial.println("it's so lonesome here 😔");
       digitalWrite(OUTPUT_PIN_START+(i*3), LOW);
       digitalWrite(OUTPUT_PIN_START+(i*3)+1, LOW);
     }
@@ -120,7 +118,7 @@ void i2cWrite(uint8_t reg, uint8_t val){
     Wire.endTransmission();
 }
 void i2cMultiplexerWrite(uint8_t reg, uint8_t val){
-    Wire.beginTransmission(0x70);
+    Wire.beginTransmission(MULTIPLEXER_ADDR);
     Wire.write(reg);
     Wire.write(val);
     Wire.endTransmission();
