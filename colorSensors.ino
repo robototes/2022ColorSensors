@@ -64,7 +64,7 @@ void setup() {
 
   pinMode(SDA, INPUT_PULLUP);
   pinMode(SCL, INPUT_PULLUP);
-  for (uint8_t i = 0; i < 4; i++) {
+  for (uint8_t i = 0; i < 6; i++) {
     pinMode(OUTPUT_PIN_START+i, OUTPUT);
   }
 }
