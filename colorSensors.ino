@@ -17,8 +17,8 @@ float maxV = 0;
 
 // these values calibrate the color sensors so they read colors correctly. calibrate by bringing sensor to white paper and then setting these to the raw values given by color sensor
 float whiteValues[NUM_OF_COLOR_SENSORS][3] = {
-                                              {7496, 13430, 6685},
-                                              {6176, 11008, 5371}
+                                              {37, 67, 36},
+                                              {22, 48, 25}
                                              };
                                              
 enum registry {
@@ -59,8 +59,12 @@ enum colorSensorMeasurementRate {
 void setup() {
   Wire.begin();
   Serial.begin(9600);
+  i2cMultiplexerWrite(MULTIPLEXER_ADDR, byte(1));
   i2cWrite(registry::sensorMode, sensorModes::color | sensorModes::light | sensorModes::prox);  //enable light sensor, activate rgb mode and activate proximity sensor
   i2cWrite(registry::lightSensorMeasurementRate, colorSensorResolution::colorRes16bit | colorSensorMeasurementRate::colorRate25ms); //set to 16 bit resolution for 25ms response time and set measurement rate to 25ms
+  i2cMultiplexerWrite(MULTIPLEXER_ADDR, byte(2));
+  i2cWrite(registry::sensorMode, sensorModes::color | sensorModes::light | sensorModes::prox); 
+  i2cWrite(registry::lightSensorMeasurementRate, colorSensorResolution::colorRes16bit | colorSensorMeasurementRate::colorRate25ms);
 
   pinMode(SDA, INPUT_PULLUP);
   pinMode(SCL, INPUT_PULLUP);
@@ -80,6 +84,12 @@ void loop() {
     blue = (readBuff[10]<<8) | readBuff[9];
     red = (readBuff[13]<<8) | readBuff[12];
 
+//    Serial.print("READING SENSOR " + String(i+1));
+//    Serial.print(", red: " + String(red));
+//    Serial.print(", green: " + String(green));
+//    Serial.print(", blue: " + String(blue));
+//    Serial.println(", proximity: " + String(proximity));
+
     red*=whiteValues[i][1] / whiteValues[i][0];
     green*=whiteValues[i][1] / whiteValues[i][1];
     blue*=whiteValues[i][1] / whiteValues[i][2];
@@ -88,12 +98,14 @@ void loop() {
     maxV=max(blue,max(red,green));
     red=255*pow(red/maxV,5);
     green=255*pow(green/maxV,5);
-    blue=255*pow(blue/maxV,5);
+    blue=255*pow(blue/maxV,5); 
 
     if (red > 254 && green < 10 && blue < 10) {
+//      Serial.println("red ball");
       digitalWrite(OUTPUT_PIN_START+(i*3), HIGH);
       digitalWrite(OUTPUT_PIN_START+(i*3)+1, LOW);
     } else if (blue > 254 && red < 10 && green < 10) {
+//      Serial.println("blue ball");
       digitalWrite(OUTPUT_PIN_START+(i*3), LOW);
       digitalWrite(OUTPUT_PIN_START+(i*3)+1, HIGH);
     } else {
